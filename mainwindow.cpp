@@ -7,7 +7,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->webEngineView->setUrl(QUrl("file:///book.html"));
+	WebClass* webobj = new WebClass();
+	QWebChannel* channel = new QWebChannel(this);
+	channel->registerObject("webobj", webobj);
+	ui->webEngineView->page()->setWebChannel(channel);
+
+    ui->webEngineView->setUrl(QUrl("file:///html/book.html"));
 }
 
 MainWindow::~MainWindow()
