@@ -398,3 +398,4 @@ healthchecksdb
 MigrationBackup/
 
 *.bak
+*.zip

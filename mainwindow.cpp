@@ -7,6 +7,14 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+	connect(ui->pushButton, &QPushButton::clicked,
+		this, [this]() {
+			ui->webEngineView->page()->runJavaScript("rendition.hooks.content.register(function(contents, view) { "
+				"var sentence = contents.document.getElementById(\"1\");  "
+			"sentence.style.background = \"yellow\"; "
+			"	}); ");
+		});
+
 	WebClass* webobj = new WebClass();
 	QWebChannel* channel = new QWebChannel(this);
 	channel->registerObject("webobj", webobj);
