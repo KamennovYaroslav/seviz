@@ -3,21 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EPUB.js Scrolled Full Example</title>
+  <title>EPUB.js + Hypothes.is Example</title>
 
-  <script src="./dist/jszip.min.js"></script>
-  <script src="./dist/epub.js"></script>
-  
-  
-  <script src="qwebchannel.js"></script>
-  
-  <script >
-    new QWebChannel(qt.webChannelTransport,
-        function(channel){
-        var webobj = channel.objects.webobj;
-        window.foo = webobj;
-    });
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+  <script src="../dist/epub.js"></script>
+
+  <!-- <script>
+  window.hypothesisConfig = function () {
+    return {
+      // constructor: this.Annotator.Sidebar,
+      app: 'https://hypothes.is/app.html',
+    };
+  };
+  </script> -->
+
+  <script type="text/javascript">
+    window.hypothesisConfig = function () {
+      return {
+        openSidebar: false,
+        enableMultiFrameSupport: true,
+        onLayoutChange: function(state) {
+          var main = document.querySelector('#main');
+          if (state.expanded === true) {
+            main.classList.add("open");
+          } else {
+            main.classList.remove("open");
+          }
+        }
+      };
+    };
   </script>
+  <script src="https://cdn.hypothes.is/hypothesis"></script>
 
   <style type="text/css">
     body {
@@ -57,8 +73,6 @@
     #navigation ul {
       padding-left: 18px;
       margin-left: 0;
-      margin-top: 12px;
-      margin-bottom: 12px;
     }
 
     #navigation ul li {
@@ -85,25 +99,20 @@
     }
 
     #viewer {
-
       overflow: hidden;
-      width: 800px;
+      width: 620px;
       margin: 0 50px;
-      background: url('ajax-loader.gif') center center no-repeat;
-
-    }
-
-    #viewer .epub-view {
-        background: white;
-        box-shadow: 0 0 4px #ccc;
-        /*margin: 10px;*/
-        /*padding: 40px 80px;*/
+      /*background: url('ajax-loader.gif') center center no-repeat;*/
+      background-color: white;
+      box-shadow: 0 0 4px #ccc;
+      margin: 20px;
+      padding: 40px 80px;
     }
 
     #main {
       position: absolute;
       top: 50px;
-      left: 50px;
+      left: 100px;
       width: 800px;
       z-index: 2;
       transition: left .15s cubic-bezier(.55, 0, .2, .8) .08s;
@@ -115,7 +124,7 @@
 
     #pagination {
       text-align: center;
-      margin-left: 80px;
+      margin: 20px;
       /*padding: 0 50px;*/
     }
 
@@ -147,6 +156,23 @@
       display: block;
       margin: 10px auto;
     }
+
+    #hypothesis-custom {
+      overflow: hidden;
+      /*position: absolute;*/
+      right: 0;
+      /*top: 0;*/
+      height: 100%;
+      width: 200px;
+      /*z-index: -2;*/
+    }
+
+    #hypothesis-custom iframe {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
   </style>
 </head>
 <body>
@@ -154,7 +180,7 @@
     <h1 id="title">...</h1>
     <image id="cover" width="150px"/>
     <h2 id="author">...</h2>
-    <div id="toc"></div>
+    <ul id="toc"></ul>
   </div>
   <div id="main">
     <div id="viewer"></div>
@@ -166,28 +192,38 @@
 
   <script>
     // Load the opf
-    var book = ePub("test.epub");
+    var params = URLSearchParams && new URLSearchParams(document.location.search.substring(1));
+    var url = params && params.get("url") && decodeURIComponent(params.get("url"));
+
+    // Load the opf
+    var book = ePub(url || window.location.protocol + "//s3.amazonaws.com/epubjs.org/books/moby-dick-hypothesis-demo.epub");
     var rendition = book.renderTo("viewer", {
-      flow: "scrolled-doc"
+      flow: "scrolled-doc",
+      ignoreClass: "annotator-hl"
     });
-    var hash = window.location.hash.slice(2);
-    console.log(hash);
+
+    // var hash = window.location.hash.slice(2);
+    var loc = window.location.href.indexOf("?loc=");
+    if (loc > -1) {
+      var href =  window.location.href.slice(loc + 5);
+      var hash = decodeURIComponent(href);
+    }
     rendition.display(hash || undefined);
 
 
     var next = document.getElementById("next");
     next.addEventListener("click", function(e){
+      window.scrollTo(0,0);
       rendition.next();
       e.preventDefault();
     }, false);
 
     var prev = document.getElementById("prev");
     prev.addEventListener("click", function(e){
+      window.scrollTo(0,0);
       rendition.prev();
       e.preventDefault();
     }, false);
-
-
 
     rendition.on("rendered", function(section){
       var nextSection = section.next();
@@ -221,49 +257,44 @@
         prev.textContent = "";
       }
 
-      // Add CFI fragment to the history
-      //history.pushState({}, '', section.href);
-      window.location.hash = "#/"+section.href
-    });
+      var old = document.querySelectorAll('.active');
+      Array.prototype.slice.call(old, 0).forEach(function (link) {
+        link.classList.remove("active");
+      })
 
-    rendition.on("relocated", function(location){
-      console.log(location);
+      var active = document.querySelector('a[href="'+section.href+'"]');
+      if (active) {
+        active.classList.add("active");
+      }
+      // Add CFI fragment to the history
+      history.pushState({}, '', "?loc=" + encodeURIComponent(section.href));
+      // window.location.hash = "#/"+section.href
     });
 
     book.loaded.navigation.then(function(toc){
       var $nav = document.getElementById("toc"),
           docfrag = document.createDocumentFragment();
-      var addTocItems = function (parent, tocItems) {
-        var $ul = document.createElement("ul");
-        tocItems.forEach(function(chapter) {
-          var item = document.createElement("li");
-          var link = document.createElement("a");
-          link.textContent = chapter.label;
-          link.href = chapter.href;
-          item.appendChild(link);
 
-          if (chapter.subitems) {
-            addTocItems(item, chapter.subitems)
-          }
+      toc.forEach(function(chapter, index) {
+        var item = document.createElement("li");
+        var link = document.createElement("a");
+        link.id = "chap-" + chapter.id;
+        link.textContent = chapter.label;
+        link.href = chapter.href;
+        item.appendChild(link);
+        docfrag.appendChild(item);
 
-          link.onclick = function(){
-            var url = link.getAttribute("href");
-            rendition.display(url);
-            return false;
-          };
+        link.onclick = function(){
+          var url = link.getAttribute("href");
+          console.log(url)
+          rendition.display(url);
+          return false;
+        };
 
-          $ul.appendChild(item);
-        });
-        parent.appendChild($ul);
-      };
-
-      addTocItems(docfrag, toc);
+      });
 
       $nav.appendChild(docfrag);
 
-      if ($nav.offsetHeight + 60 < window.innerHeight) {
-        $nav.classList.add("fixed");
-      }
 
     });
 
@@ -271,6 +302,7 @@
       var $title = document.getElementById("title");
       var $author = document.getElementById("author");
       var $cover = document.getElementById("cover");
+      var $nav = document.getElementById('navigation');
 
       $title.textContent = meta.title;
       $author.textContent = meta.creator;
@@ -283,26 +315,54 @@
         $cover.src = book.cover;
       }
 
+      if ($nav.offsetHeight + 60 < window.innerHeight) {
+        $nav.classList.add("fixed");
+      }
+
     });
-       
-    rendition.hooks.content.register(function(contents, view) {
-        contents.document.addEventListener("mousemove", function(e) {
-        var x = e.clientX, y = e.clientY,
-        elementMouseIsOver = contents.document.elementFromPoint(x, y);
-        if (elementMouseIsOver.className=='sentence') {
-    	    //window.alert(elementMouseIsOver.textContent)
-            foo.onSentenceAction(elementMouseIsOver.textContent);
-            console.log(elementMouseIsOver.textContent);
+
+    function checkForAnnotator(cb, w) {
+     if (!w) {
+       w = window;
+     }
+     setTimeout(function () {
+        if (w && w.annotator) {
+          cb();
+        } else {
+          checkForAnnotator(cb, w);
         }
-            
-        });
+      }, 100);
+    }
+
+    book.rendition.hooks.content.register(function(contents, view) {
+
+        checkForAnnotator(function () {
+
+          var annotator = contents.window.annotator;
+
+          contents.window.addEventListener('scrolltorange', function (e) {
+            var range = e.detail;
+            var cfi = new ePub.CFI(range, contents.cfiBase).toString();
+            if (cfi) {
+              book.rendition.display(cfi);
+            }
+            e.preventDefault();
+          });
+
+
+          annotator.on("highlightClick", function (annotation) {
+            console.log(annotation);
+            window.annotator.show();
+          })
+
+          annotator.on("beforeAnnotationCreated", function (annotation) {
+            console.log(annotation);
+            window.annotator.show();
+          })
+
+        }, contents.window);
+
     });
-    
-    rendition.hooks.content.register(function(contents, view) {
-        var sentence = contents.document.getElementById("1");
-        sentence.style.background = "yellow";
-    });
-    
   </script>
 
 </body>

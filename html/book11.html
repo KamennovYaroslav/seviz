@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="number" content="2">
+  <title>Введение</title>
+<!-- <script src="qwebchannel.js"></script>-->
+  <script type="text/javascript">
+  //window.status = 'hello'
+//  new QWebChannel(qt.webChannelTransport,
+//     function(channel){
+//     var webobj = channel.objects.webobj;
+//     window.foo = webobj;
+//     });
+    window.addEventListener("mousemove", function(e) {
+	var x = e.clientX, y = e.clientY,
+        elementMouseIsOver = document.elementFromPoint(x, y);
+        if (elementMouseIsOver.className=='sentence')
+    	    window.onSentenceAction(elementMouseIsOver.textContent)
+	    //  foo.onSentenceAction();
+    });
+    
+  </script>
+
+  <script src="jszip.min.js"></script>
+  <script src="epub.js"></script>
+  
+  
+ </head>
+ <body>
+
+   <div id="area"></div>
+
+   <script>
+     var book = ePub("file:///test.epub");
+     var rendition = book.renderTo("area", {width: 600, height: 400});
+     var displayed = rendition.display();
+   </script>
+   
+ </body>
+</html>

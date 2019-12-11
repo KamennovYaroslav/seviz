@@ -5,19 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EPUB.js Scrolled Full Example</title>
 
-  <script src="./dist/jszip.min.js"></script>
-  <script src="./dist/epub.js"></script>
-  
-  
-  <script src="qwebchannel.js"></script>
-  
-  <script >
-    new QWebChannel(qt.webChannelTransport,
-        function(channel){
-        var webobj = channel.objects.webobj;
-        window.foo = webobj;
-    });
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+  <script src="../dist/epub.js"></script>
+
 
   <style type="text/css">
     body {
@@ -284,25 +274,6 @@
       }
 
     });
-       
-    rendition.hooks.content.register(function(contents, view) {
-        contents.document.addEventListener("mousemove", function(e) {
-        var x = e.clientX, y = e.clientY,
-        elementMouseIsOver = contents.document.elementFromPoint(x, y);
-        if (elementMouseIsOver.className=='sentence') {
-    	    //window.alert(elementMouseIsOver.textContent)
-            foo.onSentenceAction(elementMouseIsOver.textContent);
-            console.log(elementMouseIsOver.textContent);
-        }
-            
-        });
-    });
-    
-    rendition.hooks.content.register(function(contents, view) {
-        var sentence = contents.document.getElementById("1");
-        sentence.style.background = "yellow";
-    });
-    
   </script>
 
 </body>

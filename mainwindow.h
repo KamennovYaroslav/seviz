@@ -14,9 +14,9 @@ class WebClass : public QObject
 {
 	Q_OBJECT
 public slots:
-	void onSentenceAction()
+	void onSentenceAction(const QString& text)
 	{
-		QMessageBox::information(NULL, "jscallme", "I'm called by js!");
+		QMessageBox::information(NULL, "QMessageBox", text);
 	}
 };
 
