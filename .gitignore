@@ -399,3 +399,4 @@ MigrationBackup/
 
 *.bak
 *.zip
+html/test/

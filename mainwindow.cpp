@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	});
 	
 	WebClass* webobj = new WebClass();
+	webobj->win = this;
 	QWebChannel* channel = new QWebChannel(this);
 	channel->registerObject("webobj", webobj);
 	ui->webEngineView->page()->setWebChannel(channel);
@@ -28,4 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::setSentenceText(const QString& text) {
+		ui->lineEdit->setText(text);
 }

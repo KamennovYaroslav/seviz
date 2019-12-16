@@ -10,26 +10,34 @@ namespace Ui {
 class MainWindow;
 }
 
-class WebClass : public QObject
-{
+class MainWindow : public QMainWindow {
 	Q_OBJECT
-public slots:
-	void onSentenceAction(const QString& text)
-	{
-		QMessageBox::information(NULL, "QMessageBox", text);
-	}
-};
-
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+	explicit MainWindow(QWidget* parent = nullptr);
+	~MainWindow();
+
+	void setSentenceText(const QString& text);
 
 private:
-    Ui::MainWindow *ui;
+	Ui::MainWindow* ui;
 };
 
 #endif // MAINWINDOW_H
+
+class WebClass : public QObject
+{
+	Q_OBJECT
+
+public:
+	MainWindow* win;
+
+public slots:
+	void onSentenceAction(const QString& text)
+	{
+		win->setSentenceText(text);
+	}
+};
+
+
+
