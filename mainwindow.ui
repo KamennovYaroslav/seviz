@@ -31,11 +31,18 @@
      </widget>
     </item>
     <item>
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QCheckBox" name="checkBox">
         <property name="text">
-         <string>Включить выделение предложений</string>
+         <string>Предпросмотр предложений</string>
         </property>
        </widget>
       </item>

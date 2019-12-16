@@ -1,20 +1,22 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QCheckBox>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-	connect(ui->pushButton, &QPushButton::clicked,
-		this, [this]() {
-			ui->webEngineView->page()->runJavaScript("rendition.hooks.content.register(function(contents, view) { "
-				"var sentence = contents.document.getElementById(\"1\");  "
-			"sentence.style.background = \"yellow\"; "
-			"	}); ");
-		});
-
+	connect(ui->checkBox, &QCheckBox::stateChanged, this, [this](int state) {
+		if (state == Qt::Checked) {
+			ui->webEngineView->page()->runJavaScript("enabledReaction = true;");
+		} else {
+			ui->webEngineView->page()->runJavaScript("enabledReaction = false;");
+		}
+	});
+	
 	WebClass* webobj = new WebClass();
 	QWebChannel* channel = new QWebChannel(this);
 	channel->registerObject("webobj", webobj);

@@ -12,6 +12,8 @@
   <script src="qwebchannel.js"></script>
   
   <script >
+    var enabledReaction = false;
+  
     new QWebChannel(qt.webChannelTransport,
         function(channel){
         var webobj = channel.objects.webobj;
@@ -289,7 +291,7 @@
         contents.document.addEventListener("mousemove", function(e) {
         var x = e.clientX, y = e.clientY,
         elementMouseIsOver = contents.document.elementFromPoint(x, y);
-        if (elementMouseIsOver.className=='sentence') {
+        if (elementMouseIsOver.className=='sentence' && enabledReaction) {
     	    //window.alert(elementMouseIsOver.textContent)
             foo.onSentenceAction(elementMouseIsOver.textContent);
             console.log(elementMouseIsOver.textContent);
